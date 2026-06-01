@@ -47,6 +47,13 @@ export default function Home() {
     return `Rp. ${formattedNumber}`;
   };
 
+  const formatTanggal = (value: string) => {
+    if (!value) return "-";
+
+    const [year, month, day] = value.split("-");
+    return `${day}/${month}/${year}`;
+  };
+
   const totalPemasukan = filteredTransactions
     .filter((item) => item.type === "Pemasukan")
     .reduce((total, item) => total + item.amount, 0);
@@ -104,7 +111,7 @@ export default function Home() {
     const dataExcel: Record<string, string | number>[] = filteredTransactions.map(
       (item, index) => ({
         No: index + 1,
-        Tanggal: item.date,
+        Tanggal: formatTanggal(item.date),
         Jenis: item.type,
         Kategori: item.category,
         Nominal: formatRupiah(item.amount),
@@ -152,59 +159,59 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-rose-50 p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+    <main className="min-h-screen w-full overflow-x-hidden bg-rose-50 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
             Rekap Keuangan Pribadi
           </h1>
-          <p className="mt-2 text-gray-700">
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-700 sm:text-base">
             Catat pemasukan, pengeluaran, dan pantau saldo keuanganmu dengan mudah.
           </p>
         </div>
 
-        <div className="mb-6 rounded-xl bg-sky-100 p-5 shadow">
+        <div className="mb-6 rounded-xl bg-sky-100 p-4 shadow sm:p-5">
           <label className="mb-2 block text-sm font-semibold text-gray-900">
             Rekap Bulan
           </label>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <input
               type="month"
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
-              className="rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+              className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none sm:w-auto"
             />
 
             <button
               type="button"
               onClick={() => setFilterMonth("")}
-              className="rounded-lg bg-red-300 px-4 py-2 font-semibold text-red-950 hover:bg-red-400"
+              className="w-full rounded-lg bg-red-300 px-4 py-3 font-semibold text-red-950 hover:bg-red-400 sm:w-auto"
             >
               Tampilkan Semua
             </button>
           </div>
         </div>
 
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl bg-sky-100 p-6 shadow">
+        <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-3">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
             <p className="text-sm text-gray-700">Total Pemasukan</p>
-            <h2 className="mt-2 text-2xl font-bold text-green-600">
+            <h2 className="mt-2 break-words text-xl font-bold text-green-600 sm:text-2xl">
               {formatRupiah(totalPemasukan)}
             </h2>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-6 shadow">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
             <p className="text-sm text-gray-700">Total Pengeluaran</p>
-            <h2 className="mt-2 text-2xl font-bold text-red-600">
+            <h2 className="mt-2 break-words text-xl font-bold text-red-600 sm:text-2xl">
               {formatRupiah(totalPengeluaran)}
             </h2>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-6 shadow">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
             <p className="text-sm text-gray-700">Saldo Saat Ini</p>
             <h2
-              className={`mt-2 text-2xl font-bold ${
+              className={`mt-2 break-words text-xl font-bold sm:text-2xl ${
                 saldo >= 0 ? "text-blue-600" : "text-red-600"
               }`}
             >
@@ -213,8 +220,8 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="rounded-xl bg-sky-100 p-6 shadow">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
             <h2 className="mb-4 text-xl font-semibold text-gray-900">
               Tambah Transaksi
             </h2>
@@ -229,7 +236,7 @@ export default function Home() {
                   onChange={(e) =>
                     setType(e.target.value as "Pemasukan" | "Pengeluaran")
                   }
-                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
                 >
                   <option value="Pemasukan">Pemasukan</option>
                   <option value="Pengeluaran">Pengeluaran</option>
@@ -245,7 +252,7 @@ export default function Home() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="Contoh: Makan, Gaji, Transportasi"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
                 />
               </div>
 
@@ -258,7 +265,7 @@ export default function Home() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Contoh: 300000"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
                 />
               </div>
 
@@ -270,7 +277,7 @@ export default function Home() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
                 />
               </div>
 
@@ -282,7 +289,8 @@ export default function Home() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Catatan tambahan"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                  rows={3}
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
                 ></textarea>
               </div>
 
@@ -296,8 +304,8 @@ export default function Home() {
             </form>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-6 shadow">
-            <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h2 className="text-xl font-semibold text-gray-900">
                 Daftar Transaksi
               </h2>
@@ -305,14 +313,14 @@ export default function Home() {
               <button
                 type="button"
                 onClick={handleExportExcel}
-                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 sm:w-auto"
               >
                 Export Excel
               </button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-sm">
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[650px] border-collapse text-sm">
                 <thead>
                   <tr className="border-b bg-red-300 text-left text-red-950">
                     <th className="p-3">Tanggal</th>
@@ -334,7 +342,7 @@ export default function Home() {
                     filteredTransactions.map((item) => (
                       <tr key={item.id} className="border-b border-sky-200">
                         <td className="p-3 font-semibold text-black">
-                          {item.date}
+                          {formatTanggal(item.date)}
                         </td>
 
                         <td className="p-3 text-black">
@@ -376,6 +384,59 @@ export default function Home() {
                   )}
                 </tbody>
               </table>
+            </div>
+
+            <div className="space-y-3 md:hidden">
+              {filteredTransactions.length === 0 ? (
+                <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+                  Belum ada transaksi.
+                </div>
+              ) : (
+                filteredTransactions.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-xl bg-white p-4 shadow-sm"
+                  >
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {item.category}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {formatTanggal(item.date)}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          item.type === "Pemasukan"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {item.type}
+                      </span>
+                    </div>
+
+                    <p className="text-lg font-bold text-gray-900">
+                      {formatRupiah(item.amount)}
+                    </p>
+
+                    {item.description && (
+                      <p className="mt-1 text-sm text-gray-700">
+                        {item.description}
+                      </p>
+                    )}
+
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="mt-3 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-300"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
 
             {filterMonth && (
