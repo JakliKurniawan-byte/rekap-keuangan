@@ -1,0 +1,392 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import * as XLSX from "xlsx";
+
+type Transaction = {
+  id: number;
+  type: "Pemasukan" | "Pengeluaran";
+  category: string;
+  amount: number;
+  date: string;
+  description: string;
+};
+
+export default function Home() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  const [type, setType] = useState<"Pemasukan" | "Pengeluaran">("Pengeluaran");
+  const [category, setCategory] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("transactions");
+
+    if (savedData) {
+      setTransactions(JSON.parse(savedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+  }, [transactions]);
+
+  const filteredTransactions = filterMonth
+    ? transactions.filter((item) => item.date.startsWith(filterMonth))
+    : transactions;
+
+  const formatRupiah = (value: number) => {
+    const formattedNumber = new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+
+    return `Rp. ${formattedNumber}`;
+  };
+
+  const totalPemasukan = filteredTransactions
+    .filter((item) => item.type === "Pemasukan")
+    .reduce((total, item) => total + item.amount, 0);
+
+  const totalPengeluaran = filteredTransactions
+    .filter((item) => item.type === "Pengeluaran")
+    .reduce((total, item) => total + item.amount, 0);
+
+  const saldo = totalPemasukan - totalPengeluaran;
+
+  const handleSubmit = () => {
+    if (!category || !amount || !date) {
+      alert("Kategori, nominal, dan tanggal wajib diisi.");
+      return;
+    }
+
+    if (Number(amount) <= 0) {
+      alert("Nominal harus lebih dari 0.");
+      return;
+    }
+
+    const newTransaction: Transaction = {
+      id: Date.now(),
+      type,
+      category,
+      amount: Number(amount),
+      date,
+      description,
+    };
+
+    setTransactions([newTransaction, ...transactions]);
+
+    setType("Pengeluaran");
+    setCategory("");
+    setAmount("");
+    setDate("");
+    setDescription("");
+  };
+
+  const handleDelete = (id: number) => {
+    const confirmDelete = confirm("Yakin ingin menghapus transaksi ini?");
+
+    if (!confirmDelete) return;
+
+    const filteredData = transactions.filter((item) => item.id !== id);
+    setTransactions(filteredData);
+  };
+
+  const handleExportExcel = () => {
+    if (filteredTransactions.length === 0) {
+      alert("Belum ada transaksi untuk diexport.");
+      return;
+    }
+
+    const dataExcel: Record<string, string | number>[] = filteredTransactions.map(
+      (item, index) => ({
+        No: index + 1,
+        Tanggal: item.date,
+        Jenis: item.type,
+        Kategori: item.category,
+        Nominal: formatRupiah(item.amount),
+        Keterangan: item.description || "-",
+      })
+    );
+
+    dataExcel.push({
+      No: "",
+      Tanggal: "",
+      Jenis: "",
+      Kategori: "TOTAL PEMASUKAN",
+      Nominal: formatRupiah(totalPemasukan),
+      Keterangan: "",
+    });
+
+    dataExcel.push({
+      No: "",
+      Tanggal: "",
+      Jenis: "",
+      Kategori: "TOTAL PENGELUARAN",
+      Nominal: formatRupiah(totalPengeluaran),
+      Keterangan: "",
+    });
+
+    dataExcel.push({
+      No: "",
+      Tanggal: "",
+      Jenis: "",
+      Kategori: "SALDO",
+      Nominal: formatRupiah(saldo),
+      Keterangan: "",
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataExcel);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Keuangan");
+
+    const namaFile = filterMonth
+      ? `rekap-keuangan-${filterMonth}.xlsx`
+      : "rekap-keuangan-pribadi.xlsx";
+
+    XLSX.writeFile(workbook, namaFile);
+  };
+
+  return (
+    <main className="min-h-screen bg-rose-50 p-6">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Rekap Keuangan Pribadi
+          </h1>
+          <p className="mt-2 text-gray-700">
+            Catat pemasukan, pengeluaran, dan pantau saldo keuanganmu dengan mudah.
+          </p>
+        </div>
+
+        <div className="mb-6 rounded-xl bg-sky-100 p-5 shadow">
+          <label className="mb-2 block text-sm font-semibold text-gray-900">
+            Rekap Bulan
+          </label>
+
+          <div className="flex flex-wrap gap-3">
+            <input
+              type="month"
+              value={filterMonth}
+              onChange={(e) => setFilterMonth(e.target.value)}
+              className="rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+            />
+
+            <button
+              type="button"
+              onClick={() => setFilterMonth("")}
+              className="rounded-lg bg-red-300 px-4 py-2 font-semibold text-red-950 hover:bg-red-400"
+            >
+              Tampilkan Semua
+            </button>
+          </div>
+        </div>
+
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
+          <div className="rounded-xl bg-sky-100 p-6 shadow">
+            <p className="text-sm text-gray-700">Total Pemasukan</p>
+            <h2 className="mt-2 text-2xl font-bold text-green-600">
+              {formatRupiah(totalPemasukan)}
+            </h2>
+          </div>
+
+          <div className="rounded-xl bg-sky-100 p-6 shadow">
+            <p className="text-sm text-gray-700">Total Pengeluaran</p>
+            <h2 className="mt-2 text-2xl font-bold text-red-600">
+              {formatRupiah(totalPengeluaran)}
+            </h2>
+          </div>
+
+          <div className="rounded-xl bg-sky-100 p-6 shadow">
+            <p className="text-sm text-gray-700">Saldo Saat Ini</p>
+            <h2
+              className={`mt-2 text-2xl font-bold ${
+                saldo >= 0 ? "text-blue-600" : "text-red-600"
+              }`}
+            >
+              {formatRupiah(saldo)}
+            </h2>
+          </div>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl bg-sky-100 p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              Tambah Transaksi
+            </h2>
+
+            <form className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900">
+                  Jenis Transaksi
+                </label>
+                <select
+                  value={type}
+                  onChange={(e) =>
+                    setType(e.target.value as "Pemasukan" | "Pengeluaran")
+                  }
+                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+                >
+                  <option value="Pemasukan">Pemasukan</option>
+                  <option value="Pengeluaran">Pengeluaran</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900">
+                  Kategori
+                </label>
+                <input
+                  type="text"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Contoh: Makan, Gaji, Transportasi"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900">
+                  Nominal
+                </label>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="Contoh: 300000"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900">
+                  Tanggal
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black focus:border-blue-700 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-900">
+                  Keterangan
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Catatan tambahan"
+                  className="w-full rounded-lg border border-blue-400 bg-white p-2 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                ></textarea>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white hover:bg-blue-700"
+              >
+                Simpan Transaksi
+              </button>
+            </form>
+          </div>
+
+          <div className="rounded-xl bg-sky-100 p-6 shadow">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Daftar Transaksi
+              </h2>
+
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700"
+              >
+                Export Excel
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="border-b bg-red-300 text-left text-red-950">
+                    <th className="p-3">Tanggal</th>
+                    <th className="p-3">Kategori</th>
+                    <th className="p-3">Jenis</th>
+                    <th className="p-3">Nominal</th>
+                    <th className="p-3">Aksi</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {filteredTransactions.length === 0 ? (
+                    <tr>
+                      <td className="p-3 text-gray-800" colSpan={5}>
+                        Belum ada transaksi.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredTransactions.map((item) => (
+                      <tr key={item.id} className="border-b border-sky-200">
+                        <td className="p-3 font-semibold text-black">
+                          {item.date}
+                        </td>
+
+                        <td className="p-3 text-black">
+                          <div className="font-semibold text-black">
+                            {item.category}
+                          </div>
+
+                          {item.description && (
+                            <div className="text-xs text-gray-700">
+                              {item.description}
+                            </div>
+                          )}
+                        </td>
+
+                        <td
+                          className={`p-3 font-semibold ${
+                            item.type === "Pemasukan"
+                              ? "text-green-700"
+                              : "text-red-700"
+                          }`}
+                        >
+                          {item.type}
+                        </td>
+
+                        <td className="p-3 font-semibold text-black">
+                          {formatRupiah(item.amount)}
+                        </td>
+
+                        <td className="p-3">
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="rounded-lg bg-red-100 px-3 py-1 text-red-600 hover:bg-red-400"
+                          >
+                            Hapus
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {filterMonth && (
+              <p className="mt-4 text-sm text-gray-700">
+                Menampilkan rekap bulan:{" "}
+                <span className="font-semibold">{filterMonth}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
