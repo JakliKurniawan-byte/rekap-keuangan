@@ -1,13 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { createClient, type Session, type User } from "@supabase/supabase-js";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "";
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
+
+const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
 
 type Transaction = {
   id: string;
@@ -19,6 +38,30 @@ type Transaction = {
   description: string | null;
   created_at: string;
 };
+
+type MonthlyChartData = {
+  key: string;
+  bulan: string;
+  pemasukan: number;
+  pengeluaran: number;
+  saldo: number;
+};
+
+type CategoryChartData = {
+  name: string;
+  value: number;
+};
+
+const pieColors = [
+  "#2563eb",
+  "#16a34a",
+  "#dc2626",
+  "#9333ea",
+  "#ea580c",
+  "#0891b2",
+  "#be123c",
+  "#4f46e5",
+];
 
 export default function Home() {
   const [session, setSession] = useState<Session | null>(null);
@@ -41,6 +84,11 @@ export default function Home() {
   const [filterMonth, setFilterMonth] = useState("");
 
   useEffect(() => {
+    if (!supabase) {
+      setLoadingAuth(false);
+      return;
+    }
+
     const initAuth = async () => {
       const { data } = await supabase.auth.getSession();
 
@@ -74,6 +122,8 @@ export default function Home() {
   }, []);
 
   const fetchTransactions = async () => {
+    if (!supabase) return;
+
     setLoadingData(true);
 
     const { data, error } = await supabase
@@ -98,9 +148,11 @@ export default function Home() {
     setLoadingData(false);
   };
 
-  const filteredTransactions = filterMonth
-    ? transactions.filter((item) => item.date.startsWith(filterMonth))
-    : transactions;
+  const filteredTransactions = useMemo(() => {
+    return filterMonth
+      ? transactions.filter((item) => item.date.startsWith(filterMonth))
+      : transactions;
+  }, [transactions, filterMonth]);
 
   const formatRupiah = (value: number) => {
     const formattedNumber = new Intl.NumberFormat("id-ID", {
@@ -111,11 +163,39 @@ export default function Home() {
     return `Rp. ${formattedNumber}`;
   };
 
+  const formatCompactRupiah = (value: number) => {
+    if (value >= 1_000_000_000) {
+      return `Rp ${(value / 1_000_000_000).toFixed(1)} M`;
+    }
+
+    if (value >= 1_000_000) {
+      return `Rp ${(value / 1_000_000).toFixed(1)} jt`;
+    }
+
+    if (value >= 1_000) {
+      return `Rp ${(value / 1_000).toFixed(0)} rb`;
+    }
+
+    return `Rp ${value}`;
+  };
+
   const formatTanggal = (value: string) => {
     if (!value) return "-";
 
     const [year, month, day] = value.split("-");
     return `${day}/${month}/${year}`;
+  };
+
+  const formatBulan = (value: string) => {
+    if (!value) return "-";
+
+    const [year, month] = value.split("-");
+    const dateObj = new Date(Number(year), Number(month) - 1, 1);
+
+    return dateObj.toLocaleDateString("id-ID", {
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const totalPemasukan = filteredTransactions
@@ -128,7 +208,80 @@ export default function Home() {
 
   const saldo = totalPemasukan - totalPengeluaran;
 
+  const monthlyChartData = useMemo<MonthlyChartData[]>(() => {
+    const monthlyMap = new Map<
+      string,
+      {
+        key: string;
+        bulan: string;
+        pemasukan: number;
+        pengeluaran: number;
+      }
+    >();
+
+    transactions.forEach((item) => {
+      const monthKey = item.date.slice(0, 7);
+
+      if (!monthlyMap.has(monthKey)) {
+        monthlyMap.set(monthKey, {
+          key: monthKey,
+          bulan: formatBulan(monthKey),
+          pemasukan: 0,
+          pengeluaran: 0,
+        });
+      }
+
+      const currentData = monthlyMap.get(monthKey);
+
+      if (!currentData) return;
+
+      if (item.type === "Pemasukan") {
+        currentData.pemasukan += Number(item.amount);
+      } else {
+        currentData.pengeluaran += Number(item.amount);
+      }
+    });
+
+    const sortedData = Array.from(monthlyMap.values()).sort((a, b) =>
+      a.key.localeCompare(b.key)
+    );
+
+    let runningSaldo = 0;
+
+    return sortedData.map((item) => {
+      runningSaldo += item.pemasukan - item.pengeluaran;
+
+      return {
+        ...item,
+        saldo: runningSaldo,
+      };
+    });
+  }, [transactions]);
+
+  const categoryExpenseData = useMemo<CategoryChartData[]>(() => {
+    const categoryMap = new Map<string, number>();
+
+    filteredTransactions
+      .filter((item) => item.type === "Pengeluaran")
+      .forEach((item) => {
+        const currentValue = categoryMap.get(item.category) ?? 0;
+        categoryMap.set(item.category, currentValue + Number(item.amount));
+      });
+
+    return Array.from(categoryMap.entries())
+      .map(([name, value]) => ({
+        name,
+        value,
+      }))
+      .sort((a, b) => b.value - a.value);
+  }, [filteredTransactions]);
+
   const handleRegister = async () => {
+    if (!supabase) {
+      alert("Supabase belum terhubung. Periksa environment variable.");
+      return;
+    }
+
     if (!name || !email || !password) {
       alert("Nama, email, dan password wajib diisi.");
       return;
@@ -169,6 +322,11 @@ export default function Home() {
   };
 
   const handleLogin = async () => {
+    if (!supabase) {
+      alert("Supabase belum terhubung. Periksa environment variable.");
+      return;
+    }
+
     if (!email || !password) {
       alert("Email dan password wajib diisi.");
       return;
@@ -189,6 +347,8 @@ export default function Home() {
   };
 
   const handleLogout = async () => {
+    if (!supabase) return;
+
     const confirmLogout = confirm("Yakin ingin logout?");
 
     if (!confirmLogout) return;
@@ -198,6 +358,11 @@ export default function Home() {
   };
 
   const handleSubmit = async () => {
+    if (!supabase) {
+      alert("Supabase belum terhubung. Periksa environment variable.");
+      return;
+    }
+
     if (!user) {
       alert("Kamu harus login terlebih dahulu.");
       return;
@@ -237,6 +402,8 @@ export default function Home() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!supabase) return;
+
     const confirmDelete = confirm("Yakin ingin menghapus transaksi ini?");
 
     if (!confirmDelete) return;
@@ -312,6 +479,23 @@ export default function Home() {
       <main className="flex min-h-screen items-center justify-center bg-rose-50 p-6">
         <div className="rounded-xl bg-sky-100 p-6 text-center shadow">
           <p className="font-semibold text-gray-900">Memuat aplikasi...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!isSupabaseConfigured) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-rose-50 p-6">
+        <div className="w-full max-w-lg rounded-xl bg-sky-100 p-6 shadow">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Supabase Belum Terhubung
+          </h1>
+          <p className="mt-3 text-sm leading-relaxed text-gray-700">
+            Periksa file .env.local di project lokal dan Environment Variables di
+            Vercel. Pastikan sudah ada NEXT_PUBLIC_SUPABASE_URL dan
+            NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
+          </p>
         </div>
       </main>
     );
@@ -484,6 +668,127 @@ export default function Home() {
               {formatRupiah(saldo)}
             </h2>
           </div>
+        </div>
+
+        <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              Grafik Pemasukan vs Pengeluaran
+            </h2>
+
+            {monthlyChartData.length === 0 ? (
+              <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+                Belum ada data untuk grafik.
+              </div>
+            ) : (
+              <div className="h-[320px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="bulan" />
+                    <YAxis tickFormatter={(value) => formatCompactRupiah(Number(value))} />
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <Legend />
+                    <Bar dataKey="pemasukan" name="Pemasukan" fill="#16a34a" />
+                    <Bar dataKey="pengeluaran" name="Pengeluaran" fill="#dc2626" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
+            <h2 className="mb-4 text-xl font-semibold text-gray-900">
+              Grafik Saldo Akumulatif
+            </h2>
+
+            {monthlyChartData.length === 0 ? (
+              <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+                Belum ada data untuk grafik.
+              </div>
+            ) : (
+              <div className="h-[320px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={monthlyChartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="bulan" />
+                    <YAxis tickFormatter={(value) => formatCompactRupiah(Number(value))} />
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="saldo"
+                      name="Saldo"
+                      stroke="#2563eb"
+                      strokeWidth={3}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-xl bg-sky-100 p-5 shadow sm:p-6">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900">
+            Grafik Pengeluaran per Kategori
+          </h2>
+
+          {categoryExpenseData.length === 0 ? (
+            <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+              Belum ada data pengeluaran untuk grafik kategori.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <div className="h-[320px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryExpenseData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={110}
+                      label={(entry) => entry.name}
+                    >
+                      {categoryExpenseData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${entry.name}`}
+                          fill={pieColors[index % pieColors.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className="space-y-3">
+                {categoryExpenseData.map((item, index) => (
+                  <div
+                    key={item.name}
+                    className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span
+                        className="h-4 w-4 rounded-full"
+                        style={{
+                          backgroundColor: pieColors[index % pieColors.length],
+                        }}
+                      ></span>
+                      <p className="font-semibold text-gray-900">{item.name}</p>
+                    </div>
+
+                    <p className="font-bold text-red-600">
+                      {formatRupiah(item.value)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
