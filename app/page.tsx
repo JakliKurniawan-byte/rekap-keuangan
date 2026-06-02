@@ -504,17 +504,20 @@ export default function Home() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Keuangan");
 
     const namaFile = filterMonth
-      ? `rekap-keuangan-${filterMonth}.xlsx`
-      : "rekap-keuangan-pribadi.xlsx";
+      ? `kas-kepiting-${filterMonth}.xlsx`
+      : "kas-kepiting.xlsx";
 
     XLSX.writeFile(workbook, namaFile);
   };
 
   if (loadingAuth) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-rose-50 p-6">
-        <div className="rounded-xl bg-sky-100 p-6 text-center shadow">
-          <p className="font-semibold text-gray-900">Memuat aplikasi...</p>
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-cyan-200 via-sky-100 to-yellow-100 p-6">
+        <div className="rounded-3xl border-4 border-yellow-300 bg-white p-6 text-center shadow-2xl">
+          <p className="text-4xl">🦀💰</p>
+          <p className="mt-3 font-extrabold text-slate-900">
+            Memuat peti harta...
+          </p>
         </div>
       </main>
     );
@@ -522,12 +525,13 @@ export default function Home() {
 
   if (!isSupabaseConfigured) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-rose-50 p-6">
-        <div className="w-full max-w-lg rounded-xl bg-sky-100 p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900">
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-cyan-200 via-sky-100 to-yellow-100 p-6">
+        <div className="w-full max-w-lg rounded-3xl border-4 border-yellow-300 bg-white p-6 shadow-2xl">
+          <div className="text-5xl">🦀</div>
+          <h1 className="mt-3 text-2xl font-extrabold text-red-700">
             Supabase Belum Terhubung
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-gray-700">
+          <p className="mt-3 text-sm leading-relaxed text-slate-700">
             Periksa file .env.local di project lokal dan Environment Variables di
             Vercel. Pastikan sudah ada NEXT_PUBLIC_SUPABASE_URL dan
             NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
@@ -539,84 +543,111 @@ export default function Home() {
 
   if (!session) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-rose-50 px-4 py-8">
-        <div className="w-full max-w-md rounded-2xl bg-sky-100 p-6 shadow">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Rekap Keuangan Pribadi
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Masuk atau daftar akun untuk menyimpan data keuangan secara online.
-          </p>
+      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-cyan-200 via-sky-100 to-yellow-100 px-4 py-8">
+        <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border-4 border-yellow-300 bg-sky-100 p-6 shadow-2xl">
+          <div className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-yellow-300 opacity-70"></div>
+          <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-cyan-300 opacity-70"></div>
 
-          <div className="mt-6 space-y-4">
-            {isRegister && (
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
-                  Nama
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Masukkan nama"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
-                />
+          <div className="relative z-10">
+            <div className="mb-5 rounded-3xl border-4 border-yellow-400 bg-gradient-to-r from-yellow-200 via-amber-100 to-cyan-100 p-5 text-center shadow">
+              <div className="mb-2 text-5xl">🦀💰</div>
+              <h1 className="text-3xl font-extrabold text-red-700">
+                Kas Kepiting
+              </h1>
+              <p className="mt-2 text-sm font-semibold leading-relaxed text-slate-800">
+                Jaga pemasukan, pengeluaran, dan saldo seperti menjaga peti harta
+                pribadi.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/95 p-5 shadow">
+              <div className="mb-4 text-center">
+                <p className="text-2xl">🪙</p>
+                <h2 className="text-xl font-extrabold text-slate-900">
+                  {isRegister ? "Daftar Kru Kepiting" : "Masuk ke Peti Harta"}
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  {isRegister
+                    ? "Buat akun untuk mulai mencatat keuanganmu."
+                    : "Login untuk membuka rekap keuangan pribadimu."}
+                </p>
               </div>
-            )}
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-900">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="contoh@email.com"
-                className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
-              />
+              <div className="space-y-4">
+                {isRegister && (
+                  <div>
+                    <label className="mb-1 block text-sm font-bold text-slate-900">
+                      Nama Kru
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Masukkan nama"
+                      className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-semibold text-black placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="mb-1 block text-sm font-bold text-slate-900">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="contoh@email.com"
+                    className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-semibold text-black placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm font-bold text-slate-900">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimal 6 karakter"
+                    className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-semibold text-black placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
+                  />
+                </div>
+
+                {isRegister ? (
+                  <button
+                    type="button"
+                    onClick={handleRegister}
+                    className="w-full rounded-2xl bg-green-600 p-3 font-extrabold text-white shadow hover:bg-green-700"
+                  >
+                    🪙 Daftar Akun
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleLogin}
+                    className="w-full rounded-2xl bg-red-600 p-3 font-extrabold text-white shadow hover:bg-red-700"
+                  >
+                    🔐 Buka Peti Harta
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(!isRegister)}
+                  className="w-full rounded-2xl bg-yellow-300 p-3 font-extrabold text-yellow-950 shadow hover:bg-yellow-400"
+                >
+                  {isRegister
+                    ? "Sudah punya akun? Login"
+                    : "Belum punya akun? Daftar Kru"}
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-gray-900">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimal 6 karakter"
-                className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
-              />
-            </div>
-
-            {isRegister ? (
-              <button
-                type="button"
-                onClick={handleRegister}
-                className="w-full rounded-lg bg-green-600 p-3 font-semibold text-white hover:bg-green-700"
-              >
-                Daftar Akun
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleLogin}
-                className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white hover:bg-blue-700"
-              >
-                Login
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => setIsRegister(!isRegister)}
-              className="w-full rounded-lg bg-red-300 p-3 font-semibold text-red-950 hover:bg-red-400"
-            >
-              {isRegister
-                ? "Sudah punya akun? Login"
-                : "Belum punya akun? Daftar"}
-            </button>
+            <p className="mt-5 text-center text-xs font-semibold text-slate-700">
+              🦀 Sistem rekap keuangan pribadi dengan data aman per akun.
+            </p>
           </div>
         </div>
       </main>
@@ -624,33 +655,37 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-rose-50 px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-cyan-200 via-sky-100 to-yellow-100 px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl">
-        <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold leading-tight text-gray-900 sm:text-3xl">
-              Rekap Keuangan Pribadi
-            </h1>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-700 sm:text-base">
-              Catat pemasukan, pengeluaran, dan pantau saldo keuanganmu dengan mudah.
-            </p>
-            <p className="mt-2 text-sm font-medium text-gray-800">
-              Login sebagai: {user?.email}
-            </p>
-          </div>
+        <div className="mb-6 overflow-hidden rounded-[2rem] border-4 border-yellow-300 bg-gradient-to-r from-cyan-300 via-sky-200 to-yellow-100 p-5 shadow-2xl sm:p-7">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-2 text-5xl">🦀💰🪙</div>
+              <h1 className="text-3xl font-extrabold leading-tight text-red-700 sm:text-4xl">
+                Kas Kepiting
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-slate-800 sm:text-base">
+                Pantau pemasukan, pengeluaran, dan saldo seperti menjaga peti
+                harta pribadi.
+              </p>
+              <p className="mt-2 text-sm font-bold text-slate-900">
+                Login sebagai: {user?.email}
+              </p>
+            </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-lg bg-gray-900 px-4 py-3 text-sm font-semibold text-white hover:bg-gray-700"
-          >
-            Logout
-          </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-2xl bg-red-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg hover:bg-red-700"
+            >
+              Logout dari Peti
+            </button>
+          </div>
         </div>
 
-        <div className="mb-6 rounded-xl bg-sky-100 p-4 shadow sm:p-5">
-          <label className="mb-2 block text-sm font-semibold text-gray-900">
-            Rekap Bulan
+        <div className="mb-6 rounded-3xl border-4 border-yellow-300 bg-white/90 p-4 shadow sm:p-5">
+          <label className="mb-2 block text-sm font-extrabold text-slate-900">
+            🗓️ Rekap Bulan
           </label>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -658,13 +693,13 @@ export default function Home() {
               type="month"
               value={filterMonth}
               onChange={(e) => setFilterMonth(e.target.value)}
-              className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none sm:w-auto"
+              className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none sm:w-auto"
             />
 
             <button
               type="button"
               onClick={() => setFilterMonth("")}
-              className="w-full rounded-lg bg-red-300 px-4 py-3 font-semibold text-red-950 hover:bg-red-400 sm:w-auto"
+              className="w-full rounded-2xl bg-yellow-300 px-4 py-3 font-extrabold text-yellow-950 shadow hover:bg-yellow-400 sm:w-auto"
             >
               Tampilkan Semua
             </button>
@@ -672,7 +707,7 @@ export default function Home() {
             <button
               type="button"
               onClick={fetchTransactions}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 sm:w-auto"
+              className="w-full rounded-2xl bg-cyan-600 px-4 py-3 font-extrabold text-white shadow hover:bg-cyan-700 sm:w-auto"
             >
               Refresh Data
             </button>
@@ -680,25 +715,31 @@ export default function Home() {
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-4 sm:mb-8 sm:grid-cols-3">
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <p className="text-sm text-gray-700">Total Pemasukan</p>
-            <h2 className="mt-2 break-words text-xl font-bold text-green-600 sm:text-2xl">
+          <div className="rounded-3xl border-4 border-green-300 bg-green-100 p-5 shadow-lg sm:p-6">
+            <p className="text-sm font-extrabold text-green-900">
+              💵 Total Pemasukan
+            </p>
+            <h2 className="mt-2 break-words text-xl font-extrabold text-green-700 sm:text-2xl">
               {formatRupiah(totalPemasukan)}
             </h2>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <p className="text-sm text-gray-700">Total Pengeluaran</p>
-            <h2 className="mt-2 break-words text-xl font-bold text-red-600 sm:text-2xl">
+          <div className="rounded-3xl border-4 border-red-300 bg-red-100 p-5 shadow-lg sm:p-6">
+            <p className="text-sm font-extrabold text-red-900">
+              🧾 Total Pengeluaran
+            </p>
+            <h2 className="mt-2 break-words text-xl font-extrabold text-red-700 sm:text-2xl">
               {formatRupiah(totalPengeluaran)}
             </h2>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <p className="text-sm text-gray-700">Saldo Saat Ini</p>
+          <div className="rounded-3xl border-4 border-yellow-400 bg-yellow-100 p-5 shadow-lg sm:p-6">
+            <p className="text-sm font-extrabold text-yellow-900">
+              🪙 Saldo Peti Harta
+            </p>
             <h2
-              className={`mt-2 break-words text-xl font-bold sm:text-2xl ${
-                saldo >= 0 ? "text-blue-600" : "text-red-600"
+              className={`mt-2 break-words text-xl font-extrabold sm:text-2xl ${
+                saldo >= 0 ? "text-blue-700" : "text-red-700"
               }`}
             >
               {formatRupiah(saldo)}
@@ -707,13 +748,13 @@ export default function Home() {
         </div>
 
         <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-              Grafik Pemasukan vs Pengeluaran
+          <div className="rounded-3xl border-4 border-yellow-300 bg-white/90 p-5 shadow-xl sm:p-6">
+            <h2 className="mb-4 text-xl font-extrabold text-slate-900">
+              📊 Grafik Pemasukan vs Pengeluaran
             </h2>
 
             {monthlyChartData.length === 0 ? (
-              <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+              <div className="rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-slate-800">
                 Belum ada data untuk grafik.
               </div>
             ) : (
@@ -722,24 +763,38 @@ export default function Home() {
                   <BarChart data={monthlyChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="bulan" />
-                    <YAxis tickFormatter={(value) => formatCompactRupiah(Number(value))} />
-                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <YAxis
+                      tickFormatter={(value) =>
+                        formatCompactRupiah(Number(value))
+                      }
+                    />
+                    <Tooltip
+                      formatter={(value) => formatRupiah(Number(value))}
+                    />
                     <Legend />
-                    <Bar dataKey="pemasukan" name="Pemasukan" fill="#16a34a" />
-                    <Bar dataKey="pengeluaran" name="Pengeluaran" fill="#dc2626" />
+                    <Bar
+                      dataKey="pemasukan"
+                      name="Pemasukan"
+                      fill="#16a34a"
+                    />
+                    <Bar
+                      dataKey="pengeluaran"
+                      name="Pengeluaran"
+                      fill="#dc2626"
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-              Grafik Saldo Akumulatif
+          <div className="rounded-3xl border-4 border-yellow-300 bg-white/90 p-5 shadow-xl sm:p-6">
+            <h2 className="mb-4 text-xl font-extrabold text-slate-900">
+              📈 Grafik Saldo Akumulatif
             </h2>
 
             {monthlyChartData.length === 0 ? (
-              <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+              <div className="rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-slate-800">
                 Belum ada data untuk grafik.
               </div>
             ) : (
@@ -748,8 +803,14 @@ export default function Home() {
                   <LineChart data={monthlyChartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="bulan" />
-                    <YAxis tickFormatter={(value) => formatCompactRupiah(Number(value))} />
-                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <YAxis
+                      tickFormatter={(value) =>
+                        formatCompactRupiah(Number(value))
+                      }
+                    />
+                    <Tooltip
+                      formatter={(value) => formatRupiah(Number(value))}
+                    />
                     <Legend />
                     <Line
                       type="monotone"
@@ -765,13 +826,13 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mb-6 rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-          <h2 className="mb-4 text-xl font-semibold text-gray-900">
-            Grafik Pengeluaran per Kategori
+        <div className="mb-6 rounded-3xl border-4 border-yellow-300 bg-white/90 p-5 shadow-xl sm:p-6">
+          <h2 className="mb-4 text-xl font-extrabold text-slate-900">
+            🥧 Grafik Pengeluaran per Kategori
           </h2>
 
           {categoryExpenseData.length === 0 ? (
-            <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+            <div className="rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-slate-800">
               Belum ada data pengeluaran untuk grafik kategori.
             </div>
           ) : (
@@ -786,7 +847,6 @@ export default function Home() {
                       cx="50%"
                       cy="50%"
                       outerRadius={110}
-                      label={(entry: any) => entry.name}
                     >
                       {categoryExpenseData.map((entry, index) => (
                         <Cell
@@ -795,7 +855,9 @@ export default function Home() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
+                    <Tooltip
+                      formatter={(value) => formatRupiah(Number(value))}
+                    />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -805,7 +867,7 @@ export default function Home() {
                 {categoryExpenseData.map((item, index) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between rounded-lg bg-white p-3 shadow-sm"
+                    className="flex items-center justify-between rounded-2xl border-2 border-yellow-200 bg-yellow-50 p-3 shadow-sm"
                   >
                     <div className="flex items-center gap-3">
                       <span
@@ -814,10 +876,12 @@ export default function Home() {
                           backgroundColor: pieColors[index % pieColors.length],
                         }}
                       ></span>
-                      <p className="font-semibold text-gray-900">{item.name}</p>
+                      <p className="font-extrabold text-slate-900">
+                        {item.name}
+                      </p>
                     </div>
 
-                    <p className="font-bold text-red-600">
+                    <p className="font-extrabold text-red-600">
                       {formatRupiah(item.value)}
                     </p>
                   </div>
@@ -828,14 +892,14 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
-            <h2 className="mb-4 text-xl font-semibold text-gray-900">
-              Tambah Transaksi
+          <div className="rounded-3xl border-4 border-yellow-300 bg-white/90 p-5 shadow-xl sm:p-6">
+            <h2 className="mb-4 text-xl font-extrabold text-slate-900">
+              🪙 Tambah Transaksi
             </h2>
 
             <form className="space-y-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
                   Jenis Transaksi
                 </label>
                 <select
@@ -844,7 +908,7 @@ export default function Home() {
                     setType(e.target.value as "Pemasukan" | "Pengeluaran");
                     setCategory("");
                   }}
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none"
                 >
                   <option value="Pemasukan">Pemasukan</option>
                   <option value="Pengeluaran">Pengeluaran</option>
@@ -852,13 +916,13 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
                   Kategori
                 </label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none"
                 >
                   <option value="">Pilih kategori</option>
                   {categoryOptions.map((item) => (
@@ -870,7 +934,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
                   Nominal
                 </label>
                 <input
@@ -878,24 +942,24 @@ export default function Home() {
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="Contoh: 300000"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
                   Tanggal
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-900">
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
                   Keterangan
                 </label>
                 <textarea
@@ -903,37 +967,37 @@ export default function Home() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Catatan tambahan"
                   rows={3}
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black placeholder:text-gray-500 focus:border-red-500 focus:outline-none"
                 ></textarea>
               </div>
 
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white hover:bg-blue-700"
+                className="w-full rounded-2xl bg-red-600 p-3 font-extrabold text-white shadow hover:bg-red-700"
               >
-                Simpan Transaksi
+                Simpan ke Peti Harta
               </button>
             </form>
           </div>
 
-          <div className="rounded-xl bg-sky-100 p-5 shadow sm:p-6">
+          <div className="rounded-3xl border-4 border-yellow-300 bg-white/90 p-5 shadow-xl sm:p-6">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Daftar Transaksi
+              <h2 className="text-xl font-extrabold text-slate-900">
+                📜 Daftar Transaksi
               </h2>
 
               <button
                 type="button"
                 onClick={handleExportExcel}
-                className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700 sm:w-auto"
+                className="w-full rounded-2xl bg-green-600 px-4 py-3 text-sm font-extrabold text-white shadow hover:bg-green-700 sm:w-auto"
               >
-                Export Excel
+                Export Harta ke Excel
               </button>
             </div>
 
             {loadingData ? (
-              <div className="rounded-lg bg-white p-4 text-sm font-semibold text-gray-800">
+              <div className="rounded-2xl bg-yellow-50 p-4 text-sm font-bold text-slate-800">
                 Memuat data transaksi...
               </div>
             ) : (
@@ -941,7 +1005,7 @@ export default function Home() {
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[650px] border-collapse text-sm">
                     <thead>
-                      <tr className="border-b bg-red-300 text-left text-red-950">
+                      <tr className="border-b bg-yellow-300 text-left text-yellow-950">
                         <th className="p-3">Tanggal</th>
                         <th className="p-3">Kategori</th>
                         <th className="p-3">Jenis</th>
@@ -953,31 +1017,31 @@ export default function Home() {
                     <tbody>
                       {filteredTransactions.length === 0 ? (
                         <tr>
-                          <td className="p-3 text-gray-800" colSpan={5}>
+                          <td className="p-3 font-semibold text-slate-800" colSpan={5}>
                             Belum ada transaksi.
                           </td>
                         </tr>
                       ) : (
                         filteredTransactions.map((item) => (
-                          <tr key={item.id} className="border-b border-sky-200">
-                            <td className="p-3 font-semibold text-black">
+                          <tr key={item.id} className="border-b border-yellow-200">
+                            <td className="p-3 font-bold text-black">
                               {formatTanggal(item.date)}
                             </td>
 
                             <td className="p-3 text-black">
-                              <div className="font-semibold text-black">
+                              <div className="font-bold text-black">
                                 {item.category}
                               </div>
 
                               {item.description && (
-                                <div className="text-xs text-gray-700">
+                                <div className="text-xs font-semibold text-slate-600">
                                   {item.description}
                                 </div>
                               )}
                             </td>
 
                             <td
-                              className={`p-3 font-semibold ${
+                              className={`p-3 font-extrabold ${
                                 item.type === "Pemasukan"
                                   ? "text-green-700"
                                   : "text-red-700"
@@ -986,14 +1050,14 @@ export default function Home() {
                               {item.type}
                             </td>
 
-                            <td className="p-3 font-semibold text-black">
+                            <td className="p-3 font-bold text-black">
                               {formatRupiah(Number(item.amount))}
                             </td>
 
                             <td className="p-3">
                               <button
                                 onClick={() => handleDelete(item.id)}
-                                className="rounded-lg bg-red-100 px-3 py-1 text-red-600 hover:bg-red-400"
+                                className="rounded-xl bg-red-100 px-3 py-1 font-bold text-red-600 hover:bg-red-300"
                               >
                                 Hapus
                               </button>
@@ -1007,27 +1071,27 @@ export default function Home() {
 
                 <div className="space-y-3 md:hidden">
                   {filteredTransactions.length === 0 ? (
-                    <div className="rounded-lg bg-white p-4 text-sm text-gray-800">
+                    <div className="rounded-2xl bg-yellow-50 p-4 text-sm font-semibold text-slate-800">
                       Belum ada transaksi.
                     </div>
                   ) : (
                     filteredTransactions.map((item) => (
                       <div
                         key={item.id}
-                        className="rounded-xl bg-white p-4 shadow-sm"
+                        className="rounded-2xl border-2 border-yellow-300 bg-yellow-50 p-4 shadow-sm"
                       >
                         <div className="mb-2 flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-sm font-semibold text-gray-900">
+                            <p className="text-sm font-extrabold text-slate-900">
                               {item.category}
                             </p>
-                            <p className="text-xs text-gray-600">
+                            <p className="text-xs font-semibold text-slate-600">
                               {formatTanggal(item.date)}
                             </p>
                           </div>
 
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            className={`rounded-full px-3 py-1 text-xs font-extrabold ${
                               item.type === "Pemasukan"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-red-100 text-red-700"
@@ -1037,19 +1101,19 @@ export default function Home() {
                           </span>
                         </div>
 
-                        <p className="text-lg font-bold text-gray-900">
+                        <p className="text-lg font-extrabold text-slate-900">
                           {formatRupiah(Number(item.amount))}
                         </p>
 
                         {item.description && (
-                          <p className="mt-1 text-sm text-gray-700">
+                          <p className="mt-1 text-sm font-semibold text-slate-700">
                             {item.description}
                           </p>
                         )}
 
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="mt-3 w-full rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-300"
+                          className="mt-3 w-full rounded-2xl bg-red-100 px-3 py-2 text-sm font-extrabold text-red-600 hover:bg-red-300"
                         >
                           Hapus
                         </button>
@@ -1061,9 +1125,9 @@ export default function Home() {
             )}
 
             {filterMonth && (
-              <p className="mt-4 text-sm text-gray-700">
+              <p className="mt-4 text-sm font-semibold text-slate-700">
                 Menampilkan rekap bulan:{" "}
-                <span className="font-semibold">{filterMonth}</span>
+                <span className="font-extrabold">{filterMonth}</span>
               </p>
             )}
           </div>
