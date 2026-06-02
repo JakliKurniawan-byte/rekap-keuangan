@@ -52,6 +52,37 @@ type CategoryChartData = {
   value: number;
 };
 
+const incomeCategories = [
+  "Gaji",
+  "Bonus",
+  "Freelance",
+  "Penjualan",
+  "Hadiah",
+  "Uang dari Keluarga",
+  "Tabungan Masuk",
+  "Investasi / Dividen",
+  "Refund / Pengembalian Dana",
+  "Lain-lain",
+];
+
+const expenseCategories = [
+  "Makan & Minum",
+  "Transportasi",
+  "Belanja Harian",
+  "Tagihan",
+  "Pulsa / Internet",
+  "Kesehatan",
+  "Pendidikan",
+  "Hiburan",
+  "Cicilan / Hutang",
+  "Sewa / Kos",
+  "Donasi / Sedekah",
+  "Tabungan",
+  "Investasi",
+  "Darurat",
+  "Lain-lain",
+];
+
 const pieColors = [
   "#2563eb",
   "#16a34a",
@@ -61,6 +92,8 @@ const pieColors = [
   "#0891b2",
   "#be123c",
   "#4f46e5",
+  "#65a30d",
+  "#c026d3",
 ];
 
 export default function Home() {
@@ -82,6 +115,9 @@ export default function Home() {
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
+
+  const categoryOptions =
+    type === "Pemasukan" ? incomeCategories : expenseCategories;
 
   useEffect(() => {
     if (!supabase) {
@@ -750,7 +786,7 @@ export default function Home() {
                       cx="50%"
                       cy="50%"
                       outerRadius={110}
-                      label={(entry) => entry.name}
+                      label={(entry: any) => entry.name}
                     >
                       {categoryExpenseData.map((entry, index) => (
                         <Cell
@@ -804,9 +840,10 @@ export default function Home() {
                 </label>
                 <select
                   value={type}
-                  onChange={(e) =>
-                    setType(e.target.value as "Pemasukan" | "Pengeluaran")
-                  }
+                  onChange={(e) => {
+                    setType(e.target.value as "Pemasukan" | "Pengeluaran");
+                    setCategory("");
+                  }}
                   className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
                 >
                   <option value="Pemasukan">Pemasukan</option>
@@ -818,13 +855,18 @@ export default function Home() {
                 <label className="mb-1 block text-sm font-medium text-gray-900">
                   Kategori
                 </label>
-                <input
-                  type="text"
+                <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  placeholder="Contoh: Makan, Gaji, Transportasi"
-                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black placeholder:text-gray-600 focus:border-blue-700 focus:outline-none"
-                />
+                  className="w-full rounded-lg border border-blue-400 bg-white p-3 font-medium text-black focus:border-blue-700 focus:outline-none"
+                >
+                  <option value="">Pilih kategori</option>
+                  {categoryOptions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
