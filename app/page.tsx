@@ -33,6 +33,7 @@ type Transaction = {
   user_id: string;
   type: "Pemasukan" | "Pengeluaran";
   category: string;
+  transaction_method: string | null;
   amount: number;
   date: string;
   description: string | null;
@@ -83,6 +84,35 @@ const expenseCategories = [
   "Lain-lain",
 ];
 
+const incomeMethods = [
+  "Transfer Bank",
+  "Tunai / Cash",
+  "E-Wallet",
+  "QRIS",
+  "Payroll / Gaji Kantor",
+  "Marketplace",
+  "Refund",
+  "Lain-lain",
+];
+
+const paymentMethods = [
+  "Tunai / Cash",
+  "BCA",
+  "BRI",
+  "Mandiri",
+  "BNI",
+  "SeaBank",
+  "Jenius",
+  "DANA",
+  "OVO",
+  "GoPay",
+  "ShopeePay",
+  "QRIS",
+  "Kartu Debit",
+  "Kartu Kredit",
+  "Lain-lain",
+];
+
 const pieColors = [
   "#2563eb",
   "#16a34a",
@@ -111,6 +141,7 @@ export default function Home() {
 
   const [type, setType] = useState<"Pemasukan" | "Pengeluaran">("Pengeluaran");
   const [category, setCategory] = useState("");
+  const [transactionMethod, setTransactionMethod] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState("");
   const [description, setDescription] = useState("");
@@ -118,6 +149,11 @@ export default function Home() {
 
   const categoryOptions =
     type === "Pemasukan" ? incomeCategories : expenseCategories;
+
+  const methodOptions = type === "Pemasukan" ? incomeMethods : paymentMethods;
+
+  const methodLabel =
+    type === "Pemasukan" ? "Metode Pemasukan" : "Metode Pembayaran";
 
   useEffect(() => {
     if (!supabase) {
@@ -404,8 +440,8 @@ export default function Home() {
       return;
     }
 
-    if (!category || !amount || !date) {
-      alert("Kategori, nominal, dan tanggal wajib diisi.");
+    if (!category || !transactionMethod || !amount || !date) {
+      alert("Kategori, metode transaksi, nominal, dan tanggal wajib diisi.");
       return;
     }
 
@@ -418,6 +454,7 @@ export default function Home() {
       user_id: user.id,
       type,
       category,
+      transaction_method: transactionMethod,
       amount: Number(amount),
       date,
       description: description || null,
@@ -430,6 +467,7 @@ export default function Home() {
 
     setType("Pengeluaran");
     setCategory("");
+    setTransactionMethod("");
     setAmount("");
     setDate("");
     setDescription("");
@@ -466,6 +504,7 @@ export default function Home() {
         Tanggal: formatTanggal(item.date),
         Jenis: item.type,
         Kategori: item.category,
+        Metode: item.transaction_method || "-",
         Nominal: formatRupiah(Number(item.amount)),
         Keterangan: item.description || "-",
       })
@@ -475,7 +514,8 @@ export default function Home() {
       No: "",
       Tanggal: "",
       Jenis: "",
-      Kategori: "TOTAL PEMASUKAN",
+      Kategori: "",
+      Metode: "TOTAL PEMASUKAN",
       Nominal: formatRupiah(totalPemasukan),
       Keterangan: "",
     });
@@ -484,7 +524,8 @@ export default function Home() {
       No: "",
       Tanggal: "",
       Jenis: "",
-      Kategori: "TOTAL PENGELUARAN",
+      Kategori: "",
+      Metode: "TOTAL PENGELUARAN",
       Nominal: formatRupiah(totalPengeluaran),
       Keterangan: "",
     });
@@ -493,7 +534,8 @@ export default function Home() {
       No: "",
       Tanggal: "",
       Jenis: "",
-      Kategori: "SALDO",
+      Kategori: "",
+      Metode: "SALDO",
       Nominal: formatRupiah(saldo),
       Keterangan: "",
     });
@@ -768,9 +810,7 @@ export default function Home() {
                         formatCompactRupiah(Number(value))
                       }
                     />
-                    <Tooltip
-                      formatter={(value) => formatRupiah(Number(value))}
-                    />
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
                     <Legend />
                     <Bar
                       dataKey="pemasukan"
@@ -808,9 +848,7 @@ export default function Home() {
                         formatCompactRupiah(Number(value))
                       }
                     />
-                    <Tooltip
-                      formatter={(value) => formatRupiah(Number(value))}
-                    />
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
                     <Legend />
                     <Line
                       type="monotone"
@@ -855,9 +893,7 @@ export default function Home() {
                         />
                       ))}
                     </Pie>
-                    <Tooltip
-                      formatter={(value) => formatRupiah(Number(value))}
-                    />
+                    <Tooltip formatter={(value) => formatRupiah(Number(value))} />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
@@ -907,6 +943,7 @@ export default function Home() {
                   onChange={(e) => {
                     setType(e.target.value as "Pemasukan" | "Pengeluaran");
                     setCategory("");
+                    setTransactionMethod("");
                   }}
                   className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none"
                 >
@@ -926,6 +963,24 @@ export default function Home() {
                 >
                   <option value="">Pilih kategori</option>
                   {categoryOptions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-extrabold text-slate-900">
+                  {methodLabel}
+                </label>
+                <select
+                  value={transactionMethod}
+                  onChange={(e) => setTransactionMethod(e.target.value)}
+                  className="w-full rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-3 font-bold text-black focus:border-red-500 focus:outline-none"
+                >
+                  <option value="">Pilih {methodLabel.toLowerCase()}</option>
+                  {methodOptions.map((item) => (
                     <option key={item} value={item}>
                       {item}
                     </option>
@@ -1003,11 +1058,12 @@ export default function Home() {
             ) : (
               <>
                 <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full min-w-[650px] border-collapse text-sm">
+                  <table className="w-full min-w-[760px] border-collapse text-sm">
                     <thead>
                       <tr className="border-b bg-yellow-300 text-left text-yellow-950">
                         <th className="p-3">Tanggal</th>
                         <th className="p-3">Kategori</th>
+                        <th className="p-3">Metode</th>
                         <th className="p-3">Jenis</th>
                         <th className="p-3">Nominal</th>
                         <th className="p-3">Aksi</th>
@@ -1017,13 +1073,19 @@ export default function Home() {
                     <tbody>
                       {filteredTransactions.length === 0 ? (
                         <tr>
-                          <td className="p-3 font-semibold text-slate-800" colSpan={5}>
+                          <td
+                            className="p-3 font-semibold text-slate-800"
+                            colSpan={6}
+                          >
                             Belum ada transaksi.
                           </td>
                         </tr>
                       ) : (
                         filteredTransactions.map((item) => (
-                          <tr key={item.id} className="border-b border-yellow-200">
+                          <tr
+                            key={item.id}
+                            className="border-b border-yellow-200"
+                          >
                             <td className="p-3 font-bold text-black">
                               {formatTanggal(item.date)}
                             </td>
@@ -1038,6 +1100,10 @@ export default function Home() {
                                   {item.description}
                                 </div>
                               )}
+                            </td>
+
+                            <td className="p-3 font-bold text-black">
+                              {item.transaction_method || "-"}
                             </td>
 
                             <td
@@ -1087,6 +1153,9 @@ export default function Home() {
                             </p>
                             <p className="text-xs font-semibold text-slate-600">
                               {formatTanggal(item.date)}
+                            </p>
+                            <p className="mt-1 text-xs font-bold text-slate-700">
+                              Metode: {item.transaction_method || "-"}
                             </p>
                           </div>
 
